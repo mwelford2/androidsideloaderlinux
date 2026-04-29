@@ -183,6 +183,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PlatformPaths.cs" />
     <Compile Include="ADB.cs" />
     <Compile Include="AdbCommandForm.cs">
       <SubType>Form</SubType>
