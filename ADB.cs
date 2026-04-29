@@ -16,8 +16,8 @@ namespace AndroidSideloader
     internal class ADB
     {
         private static readonly SettingsManager settings = SettingsManager.Instance;
-        public static string adbFolderPath = Path.Combine(Environment.CurrentDirectory, "platform-tools");
-        public static string adbFilePath = Path.Combine(adbFolderPath, "adb.exe");
+        public static string adbFolderPath = PlatformPaths.PlatformToolsDir;
+        public static string adbFilePath = PlatformPaths.AdbPath;
         public static string DeviceID = "";
         public static string package = "";
         public static bool wirelessadbON;
@@ -76,7 +76,7 @@ namespace AndroidSideloader
         {
             if (!File.Exists(adbFilePath))
             {
-                return new ProcessOutput("", "adb.exe not found");
+                return new ProcessOutput("", $"{PlatformPaths.AdbExecutableName} not found");
             }
 
             command = command.Replace("adb", "");

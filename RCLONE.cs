@@ -3,7 +3,6 @@ using JR.Utils.GUI.Forms;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Management;
 using System.Text;
 using System.Windows.Forms;
 
@@ -15,23 +14,13 @@ namespace AndroidSideloader
         // Kill RCLONE Processes that were started from Rookie by looking for child processes.
         public static void killRclone()
         {
-            var parentProcessId = Process.GetCurrentProcess().Id;
             var processes = Process.GetProcessesByName("rclone");
 
             foreach (var process in processes)
             {
                 try
                 {
-                    using (ManagementObject obj = new ManagementObject($"win32_process.handle='{process.Id}'"))
-                    {
-                        obj.Get();
-                        var ppid = Convert.ToInt32(obj["ParentProcessId"]);
-
-                        if (ppid == parentProcessId)
-                        {
-                            process.Kill();
-                        }
-                    }
+                    process.Kill();
                 }
                 catch (Exception ex)
                 {
@@ -43,7 +32,7 @@ namespace AndroidSideloader
         // For custom configs that use a password
         public static void Init()
         {
-            string PwTxtPath = Path.Combine(Environment.CurrentDirectory, "rclone\\pw.txt");
+            string PwTxtPath = Path.Combine(PlatformPaths.RcloneDir, "pw.txt");
             if (File.Exists(PwTxtPath))
             {
                 rclonepw = File.ReadAllText(PwTxtPath);
@@ -90,7 +79,7 @@ namespace AndroidSideloader
                 command += " --ask-password=false";
             }
 
-            string logcmd = Utilities.StringUtilities.RemoveEverythingBeforeFirst(command, "rclone.exe");
+            string logcmd = Utilities.StringUtilities.RemoveEverythingBeforeFirst(command, PlatformPaths.RcloneExecutableName);
             if (logcmd.Contains($"\"{settings.CurrentLogPath}\""))
             {
                 logcmd = logcmd.Replace($"\"{settings.CurrentLogPath}\"", $"\"{settings.CurrentLogName}\"");
@@ -103,12 +92,12 @@ namespace AndroidSideloader
 
             _ = Logger.Log($"Running Rclone command: {logcmd}");
 
-            rclone.StartInfo.FileName = Path.Combine(Environment.CurrentDirectory, "rclone", "rclone.exe");
+            rclone.StartInfo.FileName = PlatformPaths.NormalizeExecutablePath(PlatformPaths.RclonePath);
             rclone.StartInfo.Arguments = command;
             rclone.StartInfo.RedirectStandardInput = true;
             rclone.StartInfo.RedirectStandardError = true;
             rclone.StartInfo.RedirectStandardOutput = true;
-            rclone.StartInfo.WorkingDirectory = Path.Combine(Environment.CurrentDirectory, "rclone");
+            rclone.StartInfo.WorkingDirectory = PlatformPaths.RcloneDir;
             rclone.StartInfo.CreateNoWindow = true;
 
             setRcloneProxy();
@@ -200,7 +189,7 @@ namespace AndroidSideloader
                 command += $" --config {uploadConfigPath}";
             }
 
-            string logcmd = Utilities.StringUtilities.RemoveEverythingBeforeFirst(command, "rclone.exe");
+            string logcmd = Utilities.StringUtilities.RemoveEverythingBeforeFirst(command, PlatformPaths.RcloneExecutableName);
             if (logcmd.Contains($"\"{settings.CurrentLogPath}\""))
             {
                 logcmd = logcmd.Replace($"\"{settings.CurrentLogPath}\"", $"\"{settings.CurrentLogName}\"");
@@ -215,12 +204,12 @@ namespace AndroidSideloader
 
             command += " --checkers 1 --retries 2 --inplace";
 
-            rclone.StartInfo.FileName = Path.Combine(Environment.CurrentDirectory, "rclone", "rclone.exe");
+            rclone.StartInfo.FileName = PlatformPaths.NormalizeExecutablePath(PlatformPaths.RclonePath);
             rclone.StartInfo.Arguments = command;
             rclone.StartInfo.RedirectStandardInput = true;
             rclone.StartInfo.RedirectStandardError = true;
             rclone.StartInfo.RedirectStandardOutput = true;
-            rclone.StartInfo.WorkingDirectory = Path.Combine(Environment.CurrentDirectory, "rclone");
+            rclone.StartInfo.WorkingDirectory = PlatformPaths.RcloneDir;
             rclone.StartInfo.CreateNoWindow = true;
 
             setRcloneProxy();
@@ -278,7 +267,7 @@ namespace AndroidSideloader
             // Rclone output is unicode, else it will show garbage instead of unicode characters
             rclone.StartInfo.StandardOutputEncoding = Encoding.UTF8;
 
-            string logcmd = Utilities.StringUtilities.RemoveEverythingBeforeFirst(command, "rclone.exe");
+            string logcmd = Utilities.StringUtilities.RemoveEverythingBeforeFirst(command, PlatformPaths.RcloneExecutableName);
             if (logcmd.Contains($"\"{settings.CurrentLogPath}\""))
             {
                 logcmd = logcmd.Replace($"\"{settings.CurrentLogPath}\"", $"\"{settings.CurrentLogName}\"");
@@ -295,12 +284,12 @@ namespace AndroidSideloader
 
             //set http source & args
             command += $" --http-url {MainForm.PublicConfigFile.BaseUri} {MainForm.PublicMirrorExtraArgs}";
-            rclone.StartInfo.FileName = Path.Combine(Environment.CurrentDirectory, "rclone", "rclone.exe");
+            rclone.StartInfo.FileName = PlatformPaths.NormalizeExecutablePath(PlatformPaths.RclonePath);
             rclone.StartInfo.Arguments = command;
             rclone.StartInfo.RedirectStandardInput = true;
             rclone.StartInfo.RedirectStandardError = true;
             rclone.StartInfo.RedirectStandardOutput = true;
-            rclone.StartInfo.WorkingDirectory = Path.Combine(Environment.CurrentDirectory, "rclone");
+            rclone.StartInfo.WorkingDirectory = PlatformPaths.RcloneDir;
             rclone.StartInfo.CreateNoWindow = true;
 
             setRcloneProxy();
